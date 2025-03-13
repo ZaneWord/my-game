@@ -14,108 +14,77 @@
             margin: 0;
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        #game-container {
-            position: relative;
-            margin-bottom: 20px;
         }
         #gameCanvas {
             border: 2px solid #333;
             background-color: #fff;
-            max-width: 100%;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         #score {
-            position: absolute;
-            top: -30px;
-            left: 0;
-            font-size: 20px;
-            font-weight: bold;
+            font-size: 24px;
+            margin: 20px 0;
+            color: #333;
         }
         #game-over {
             display: none;
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.8);
+            background-color: rgba(0,0,0,0.8);
             color: white;
             padding: 20px;
             border-radius: 10px;
             text-align: center;
         }
-        button {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .instructions {
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .share-buttons {
+        .controls {
             margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            gap: 5px;
+        }
+        .control-button {
+            width: 60px;
+            height: 60px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 24px;
             display: flex;
-            gap: 10px;
+            align-items: center;
             justify-content: center;
+            user-select: none;
+            touch-action: manipulation;
         }
-        .share-button {
-            background-color: #1da1f2;
-            padding: 10px 20px;
-        }
-        .share-button.weixin {
-            background-color: #07c160;
+        .control-button:active {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <div class="instructions">
-        <h2>游戏说明</h2>
-        <p>使用方向键控制蛇的移动方向。按住方向键可以加速。吃到食物可以增加分数，撞到墙壁或自己会导致游戏结束。</p>
+    <div id="score">分数: 0</div>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div class="controls">
+        <button class="control-button" style="visibility: hidden;">　</button>
+        <button class="control-button" data-direction="up">↑</button>
+        <button class="control-button" style="visibility: hidden;">　</button>
+        <button class="control-button" data-direction="left">←</button>
+        <button class="control-button" data-direction="down">↓</button>
+        <button class="control-button" data-direction="right">→</button>
     </div>
-    <div id="game-container">
-        <div id="score">分数: 0</div>
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
-        <div id="game-over">
-            <h2>游戏结束!</h2>
-            <p>最终分数: <span id="final-score">0</span></p>
-            <button onclick="startGame()">重新开始</button>
-            <div class="share-buttons">
-                <button class="share-button" onclick="shareScore('weibo')">分享到微博</button>
-                <button class="share-button weixin" onclick="shareScore('weixin')">分享到微信</button>
-            </div>
-        </div>
+    <div id="game-over">
+        <h2>游戏结束</h2>
+        <p>最终得分: <span id="final-score">0</span></p>
+        <button onclick="location.reload()">重新开始</button>
     </div>
     <script src="snake.js"></script>
     <script>
-    function shareScore(platform) {
-        const score = document.getElementById('final-score').textContent;
-        const text = `我在贪吃蛇游戏中获得了${score}分，快来挑战我吧！`;
-        const url = window.location.href;
-        
-        if (platform === 'weibo') {
-            const weiboUrl = `http://service.weibo.com/share/share.php?url=${encodeURIComponent(url)}&title=${encodeURIComponent(text)}`;
-            window.open(weiboUrl, '_blank');
-        } else if (platform === 'weixin') {
-            // 由于微信分享需要微信SDK，这里我们简单提示用户复制链接
-            alert('请复制链接分享到微信：' + url);
-        }
-    }
+        window.onload = () => {
+            const game = new Game();
+            game.update();
+        };
     </script>
 </body>
 </html>

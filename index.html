@@ -81,16 +81,55 @@
         .share-button.weixin {
             background-color: #07c160;
         }
+        #control-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(3, 60px);
+            gap: 5px;
+            margin-top: 20px;
+        }
+        .control-button {
+            background-color: rgba(76, 175, 80, 0.8);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .control-button:active {
+            background-color: rgba(69, 160, 73, 0.8);
+        }
+        @media (min-width: 768px) {
+            #control-buttons {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="instructions">
         <h2>游戏说明</h2>
-        <p>使用方向键控制蛇的移动方向。按住方向键可以加速。吃到食物可以增加分数，撞到墙壁或自己会导致游戏结束。</p>
+        <p>在电脑上使用方向键控制蛇的移动方向，在手机上使用虚拟按钮控制。按住方向键或虚拟按钮可以加速。吃到食物可以增加分数，撞到墙壁或自己会导致游戏结束。</p>
     </div>
     <div id="game-container">
         <div id="score">分数: 0</div>
         <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div id="control-buttons">
+            <div></div>
+            <button class="control-button" data-direction="up">↑</button>
+            <div></div>
+            <button class="control-button" data-direction="left">←</button>
+            <div></div>
+            <button class="control-button" data-direction="right">→</button>
+            <div></div>
+            <button class="control-button" data-direction="down">↓</button>
+            <div></div>
+        </div>
         <div id="game-over">
             <h2>游戏结束!</h2>
             <p>最终分数: <span id="final-score">0</span></p>
