@@ -1,43 +1,21 @@
 class Snake {
     constructor() {
-        this.segments = [
-            {x: 10, y: 10},
-            {x: 9, y: 10},
-            {x: 8, y: 10}
-        ];
+        this.segments = [{ x: 10, y: 10 }];
         this.direction = 'right';
         this.nextDirection = 'right';
         this.isAccelerating = false;
     }
 
-    move(hasEaten) {
-        const head = {...this.segments[0]};
-
-        this.direction = this.nextDirection;
-
-        switch(this.direction) {
-            case 'up': head.y--; break;
-            case 'down': head.y++; break;
-            case 'left': head.x--; break;
-            case 'right': head.x++; break;
-        }
-
-        this.segments.unshift(head);
-        if (!hasEaten) {
-            this.segments.pop();
-        }
-    }
-
-    setDirection(direction) {
+    setDirection(newDirection) {
         const opposites = {
-            'up': 'down',
-            'down': 'up',
-            'left': 'right',
-            'right': 'left'
+            up: 'down',
+            down: 'up',
+            left: 'right',
+            right: 'left'
         };
 
-        if (opposites[direction] !== this.direction) {
-            this.nextDirection = direction;
+        if (newDirection && opposites[newDirection] !== this.direction) {
+            this.nextDirection = newDirection;
         }
     }
 
@@ -45,24 +23,44 @@ class Snake {
         this.isAccelerating = isAccelerating;
     }
 
+    move(grow = false) {
+        this.direction = this.nextDirection;
+
+        const head = { ...this.segments[0] };
+
+        switch (this.direction) {
+            case 'up':
+                head.y--;
+                break;
+            case 'down':
+                head.y++;
+                break;
+            case 'left':
+                head.x--;
+                break;
+            case 'right':
+                head.x++;
+                break;
+        }
+
+        this.segments.unshift(head);
+        if (!grow) {
+            this.segments.pop();
+        }
+    }
+
     checkCollision(gridSize) {
         const head = this.segments[0];
-        
+
         // 检查是否撞墙
-        if (head.x < 0 || head.x >= gridSize || 
-            head.y < 0 || head.y >= gridSize) {
+        if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
             return true;
         }
 
         // 检查是否撞到自己
-        for (let i = 1; i < this.segments.length; i++) {
-            if (head.x === this.segments[i].x && 
-                head.y === this.segments[i].y) {
-                return true;
-            }
-        }
-
-        return false;
+        return this.segments.slice(1).some(segment => 
+            segment.x === head.x && segment.y === head.y
+        );
     }
 }
 
@@ -76,11 +74,12 @@ class Game {
         this.food = this.generateFood();
         this.score = 0;
         this.gameOver = false;
-        this.speed = 150;
-        this.normalSpeed = 150;
-        this.acceleratedSpeed = 100; // 1.5倍速
+        this.speed = 200;
+        this.normalSpeed = 200; // 降低到原来的70%左右
+        this.acceleratedSpeed = 140; // 降低到原来的70%左右
 
         this.bindControls();
+        this.bindTouchControls();
     }
 
     generateFood() {
@@ -135,6 +134,59 @@ class Game {
         });
     }
 
+    bindTouchControls() {
+        const controlButtons = document.querySelectorAll('.control-button');
+        let touchStartTime = 0;
+        let currentTouchButton = null;
+        
+        controlButtons.forEach(button => {
+            const direction = button.dataset.direction;
+
+            // 处理点击事件
+            button.addEventListener('mousedown', () => {
+                this.snake.setDirection(direction);
+                touchStartTime = Date.now();
+                this.snake.setAcceleration(true);
+                this.speed = this.acceleratedSpeed;
+                currentTouchButton = button;
+            });
+
+            button.addEventListener('mouseup', () => {
+                this.snake.setAcceleration(false);
+                this.speed = this.normalSpeed;
+                currentTouchButton = null;
+            });
+
+            // 处理触摸事件
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                this.snake.setDirection(direction);
+                touchStartTime = Date.now();
+                this.snake.setAcceleration(true);
+                this.speed = this.acceleratedSpeed;
+                currentTouchButton = button;
+            });
+
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                if (currentTouchButton === button) {
+                    this.snake.setAcceleration(false);
+                    this.speed = this.normalSpeed;
+                    currentTouchButton = null;
+                }
+            });
+
+            button.addEventListener('touchcancel', (e) => {
+                e.preventDefault();
+                if (currentTouchButton === button) {
+                    this.snake.setAcceleration(false);
+                    this.speed = this.normalSpeed;
+                    currentTouchButton = null;
+                }
+            });
+        });
+    }
+
     update() {
         if (this.gameOver) return;
 
@@ -162,7 +214,8 @@ class Game {
             return;
         }
 
-        this.draw();
+        // 只在必要时重绘
+        requestAnimationFrame(() => this.draw());
         setTimeout(() => this.update(), this.speed);
     }
 
