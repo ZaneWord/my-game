@@ -135,55 +135,72 @@ class Game {
     }
 
     bindTouchControls() {
-        const controlButtons = document.querySelectorAll('.control-button');
+        const canvas = this.canvas;
         let touchStartTime = 0;
-        let currentTouchButton = null;
-        
-        controlButtons.forEach(button => {
-            const direction = button.dataset.direction;
+        let lastTouchPosition = null;
 
-            // 处理点击事件
-            button.addEventListener('mousedown', () => {
+        const getDirectionFromPosition = (touchX, touchY) => {
+            const head = this.snake.segments[0];
+            const headX = head.x * this.tileSize + this.tileSize / 2;
+            const headY = head.y * this.tileSize + this.tileSize / 2;
+
+            const dx = touchX - headX;
+            const dy = touchY - headY;
+
+            // 根据触摸点相对于蛇头的位置确定方向
+            if (Math.abs(dx) > Math.abs(dy)) {
+                return dx > 0 ? 'right' : 'left';
+            } else {
+                return dy > 0 ? 'down' : 'up';
+            }
+        };
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const touchX = touch.clientX - rect.left;
+            const touchY = touch.clientY - rect.top;
+
+            touchStartTime = Date.now();
+            lastTouchPosition = { x: touchX, y: touchY };
+
+            const direction = getDirectionFromPosition(touchX, touchY);
+            this.snake.setDirection(direction);
+            this.snake.setAcceleration(true);
+            this.speed = this.acceleratedSpeed;
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const touchX = touch.clientX - rect.left;
+            const touchY = touch.clientY - rect.top;
+
+            // 只有当触摸位置发生显著变化时才更新方向
+            if (lastTouchPosition && (
+                Math.abs(touchX - lastTouchPosition.x) > 10 ||
+                Math.abs(touchY - lastTouchPosition.y) > 10
+            )) {
+                const direction = getDirectionFromPosition(touchX, touchY);
                 this.snake.setDirection(direction);
-                touchStartTime = Date.now();
-                this.snake.setAcceleration(true);
-                this.speed = this.acceleratedSpeed;
-                currentTouchButton = button;
-            });
+                lastTouchPosition = { x: touchX, y: touchY };
+            }
+        });
 
-            button.addEventListener('mouseup', () => {
-                this.snake.setAcceleration(false);
-                this.speed = this.normalSpeed;
-                currentTouchButton = null;
-            });
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.snake.setAcceleration(false);
+            this.speed = this.normalSpeed;
+            lastTouchPosition = null;
+        });
 
-            // 处理触摸事件
-            button.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                this.snake.setDirection(direction);
-                touchStartTime = Date.now();
-                this.snake.setAcceleration(true);
-                this.speed = this.acceleratedSpeed;
-                currentTouchButton = button;
-            });
-
-            button.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                if (currentTouchButton === button) {
-                    this.snake.setAcceleration(false);
-                    this.speed = this.normalSpeed;
-                    currentTouchButton = null;
-                }
-            });
-
-            button.addEventListener('touchcancel', (e) => {
-                e.preventDefault();
-                if (currentTouchButton === button) {
-                    this.snake.setAcceleration(false);
-                    this.speed = this.normalSpeed;
-                    currentTouchButton = null;
-                }
-            });
+        canvas.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
+            this.snake.setAcceleration(false);
+            this.speed = this.normalSpeed;
+            lastTouchPosition = null;
         });
     }
 
