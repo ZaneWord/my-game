@@ -140,18 +140,26 @@ class Game {
         let lastTouchPosition = null;
 
         const getDirectionFromPosition = (touchX, touchY) => {
-            const head = this.snake.segments[0];
-            const headX = head.x * this.tileSize + this.tileSize / 2;
-            const headY = head.y * this.tileSize + this.tileSize / 2;
+            // 计算触摸点相对于棋盘中心的位置
+            const centerX = this.canvas.width / 2;
+            const centerY = this.canvas.height / 2;
+            const dx = touchX - centerX;
+            const dy = touchY - centerY;
 
-            const dx = touchX - headX;
-            const dy = touchY - headY;
+            // 使用反正切函数计算角度（弧度）
+            const angle = Math.atan2(dy, dx);
+            // 将弧度转换为角度
+            const degrees = angle * (180 / Math.PI);
 
-            // 根据触摸点相对于蛇头的位置确定方向
-            if (Math.abs(dx) > Math.abs(dy)) {
-                return dx > 0 ? 'right' : 'left';
+            // 根据角度判断方向（将360度分为四个90度的扇区）
+            if (degrees >= -45 && degrees < 45) {
+                return 'right';
+            } else if (degrees >= 45 && degrees < 135) {
+                return 'down';
+            } else if (degrees >= -135 && degrees < -45) {
+                return 'up';
             } else {
-                return dy > 0 ? 'down' : 'up';
+                return 'left';
             }
         };
 
