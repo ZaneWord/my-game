@@ -77,6 +77,9 @@ class Game {
         this.speed = 200;
         this.normalSpeed = 200; // 降低到原来的70%左右
         this.acceleratedSpeed = 140; // 降低到原来的70%左右
+        this.foodColor = this.getRandomColor();
+        this.gridColor = '#f0f0f0';
+        this.snakeColors = ['#4CAF50', '#388E3C', '#2E7D32', '#1B5E20'];
 
         this.bindControls();
         this.bindTouchControls();
@@ -98,7 +101,10 @@ class Game {
                 }
             }
 
-            if (!onSnake) return food;
+            if (!onSnake) {
+                this.foodColor = this.getRandomColor();
+                return food;
+            }
         }
     }
 
@@ -244,29 +250,163 @@ class Game {
         setTimeout(() => this.update(), this.speed);
     }
 
+    getRandomColor() {
+        const colors = [
+            '#FF5252', // 红色
+            '#FF4081', // 粉色
+            '#7C4DFF', // 深紫色
+            '#536DFE', // 靛蓝色
+            '#448AFF', // 蓝色
+            '#40C4FF', // 浅蓝色
+            '#18FFFF', // 青色
+            '#64FFDA', // 蓝绿色
+            '#69F0AE', // 绿色
+            '#B2FF59', // 浅绿色
+            '#EEFF41', // 酸橙色
+            '#FFFF00', // 黄色
+            '#FFD740', // 琥珀色
+            '#FFAB40', // 橙色
+            '#FF6E40'  // 深橙色
+        ];
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+
     draw() {
         // 清空画布
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+        // 绘制网格背景
+        this.drawGrid();
+
         // 绘制食物
-        this.ctx.fillStyle = '#ff0000';
-        this.ctx.fillRect(
-            this.food.x * this.tileSize,
-            this.food.y * this.tileSize,
-            this.tileSize,
-            this.tileSize
-        );
+        this.drawFood();
 
         // 绘制蛇
+        this.drawSnake();
+    }
+
+    drawGrid() {
+        this.ctx.strokeStyle = this.gridColor;
+        this.ctx.lineWidth = 0.5;
+
+        // 绘制垂直线
+        for (let x = 0; x <= this.gridSize; x++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x * this.tileSize, 0);
+            this.ctx.lineTo(x * this.tileSize, this.canvas.height);
+            this.ctx.stroke();
+        }
+
+        // 绘制水平线
+        for (let y = 0; y <= this.gridSize; y++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, y * this.tileSize);
+            this.ctx.lineTo(this.canvas.width, y * this.tileSize);
+            this.ctx.stroke();
+        }
+    }
+
+    drawFood() {
+        const centerX = (this.food.x + 0.5) * this.tileSize;
+        const centerY = (this.food.y + 0.5) * this.tileSize;
+        const radius = this.tileSize / 2 * 0.8;
+
+        // 绘制圆形食物
+        this.ctx.fillStyle = this.foodColor;
+        this.ctx.beginPath();
+        this.ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        // 添加高光效果
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        this.ctx.beginPath();
+        this.ctx.arc(centerX - radius/3, centerY - radius/3, radius/4, 0, Math.PI * 2);
+        this.ctx.fill();
+    }
+
+    drawSnake() {
+        // 绘制蛇身体
         this.snake.segments.forEach((segment, index) => {
-            this.ctx.fillStyle = index === 0 ? '#006400' : '#008000';
-            this.ctx.fillRect(
-                segment.x * this.tileSize,
-                segment.y * this.tileSize,
-                this.tileSize,
-                this.tileSize
-            );
+            // 为蛇身体创建渐变色
+            const colorIndex = index % this.snakeColors.length;
+            const segmentColor = this.snakeColors[colorIndex];
+            
+            this.ctx.fillStyle = segmentColor;
+            
+            // 圆角矩形
+            const x = segment.x * this.tileSize;
+            const y = segment.y * this.tileSize;
+            const size = this.tileSize * 0.9;
+            const offset = (this.tileSize - size) / 2;
+            const radius = size / 4;
+            
+            this.ctx.beginPath();
+            this.ctx.moveTo(x + offset + radius, y + offset);
+            this.ctx.lineTo(x + offset + size - radius, y + offset);
+            this.ctx.quadraticCurveTo(x + offset + size, y + offset, x + offset + size, y + offset + radius);
+            this.ctx.lineTo(x + offset + size, y + offset + size - radius);
+            this.ctx.quadraticCurveTo(x + offset + size, y + offset + size, x + offset + size - radius, y + offset + size);
+            this.ctx.lineTo(x + offset + radius, y + offset + size);
+            this.ctx.quadraticCurveTo(x + offset, y + offset + size, x + offset, y + offset + size - radius);
+            this.ctx.lineTo(x + offset, y + offset + radius);
+            this.ctx.quadraticCurveTo(x + offset, y + offset, x + offset + radius, y + offset);
+            this.ctx.closePath();
+            this.ctx.fill();
+            
+            // 为蛇头添加眼睛
+            if (index === 0) {
+                this.drawSnakeEyes(segment);
+            }
         });
+    }
+    
+    drawSnakeEyes(headSegment) {
+        const x = headSegment.x * this.tileSize;
+        const y = headSegment.y * this.tileSize;
+        const eyeSize = this.tileSize / 6;
+        const eyeOffset = this.tileSize / 4;
+        
+        // 根据蛇的方向确定眼睛位置
+        let leftEyeX, leftEyeY, rightEyeX, rightEyeY;
+        
+        switch(this.snake.direction) {
+            case 'up':
+                leftEyeX = x + eyeOffset;
+                leftEyeY = y + eyeOffset;
+                rightEyeX = x + this.tileSize - eyeOffset - eyeSize;
+                rightEyeY = y + eyeOffset;
+                break;
+            case 'down':
+                leftEyeX = x + eyeOffset;
+                leftEyeY = y + this.tileSize - eyeOffset - eyeSize;
+                rightEyeX = x + this.tileSize - eyeOffset - eyeSize;
+                rightEyeY = y + this.tileSize - eyeOffset - eyeSize;
+                break;
+            case 'left':
+                leftEyeX = x + eyeOffset;
+                leftEyeY = y + eyeOffset;
+                rightEyeX = x + eyeOffset;
+                rightEyeY = y + this.tileSize - eyeOffset - eyeSize;
+                break;
+            case 'right':
+                leftEyeX = x + this.tileSize - eyeOffset - eyeSize;
+                leftEyeY = y + eyeOffset;
+                rightEyeX = x + this.tileSize - eyeOffset - eyeSize;
+                rightEyeY = y + this.tileSize - eyeOffset - eyeSize;
+                break;
+        }
+        
+        // 绘制眼睛
+        this.ctx.fillStyle = 'white';
+        this.ctx.fillRect(leftEyeX, leftEyeY, eyeSize, eyeSize);
+        this.ctx.fillRect(rightEyeX, rightEyeY, eyeSize, eyeSize);
+        
+        // 绘制瞳孔
+        this.ctx.fillStyle = 'black';
+        const pupilSize = eyeSize / 2;
+        const pupilOffset = (eyeSize - pupilSize) / 2;
+        this.ctx.fillRect(leftEyeX + pupilOffset, leftEyeY + pupilOffset, pupilSize, pupilSize);
+        this.ctx.fillRect(rightEyeX + pupilOffset, rightEyeY + pupilOffset, pupilSize, pupilSize);
     }
 }
 
