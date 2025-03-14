@@ -58,9 +58,18 @@
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            if(!gameState) {
+                gameState = initGame();
+            } else {
+                // 更新玩家位置以适应新的画布尺寸
+                gameState.player.y = canvas.height - 100;
+            }
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
+
+        // 移除这行，因为已经在resizeCanvas中初始化了
+        // let gameState = initGame();
 
         // 游戏主循环
         function gameLoop() {
@@ -235,25 +244,16 @@
         let touchStartX = 0;
         canvas.addEventListener('touchstart', (e) => {
             touchStartX = e.touches[0].clientX;
+            gameState.player.x = e.touches[0].clientX;  // 直接设置飞机位置为触摸位置
             e.preventDefault();
         });
 
         canvas.addEventListener('touchmove', (e) => {
-            const touchX = e.touches[0].clientX;
-            const moveDistance = touchX - touchStartX;
-            
-            if(Math.abs(moveDistance) > 10) {  // 添加少许阈值避免抖动
-                gameState.player.isMovingLeft = moveDistance < 0;
-                gameState.player.isMovingRight = moveDistance > 0;
-            }
-            
-            touchStartX = touchX;  // 更新起始位置实现连续移动
+            gameState.player.x = e.touches[0].clientX;  // 直接设置飞机位置为触摸位置
             e.preventDefault();
         });
 
         canvas.addEventListener('touchend', (e) => {
-            gameState.player.isMovingLeft = false;
-            gameState.player.isMovingRight = false;
             e.preventDefault();
         });
 
