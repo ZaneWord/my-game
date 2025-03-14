@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏导航</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a1a, #4a4a4a);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #fff;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .game-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .game-card h2 {
+            color: #fff;
+            margin-bottom: 15px;
+        }
+        .game-card p {
+            color: #ddd;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .play-button {
+            display: inline-block;
+            padding: 10px 30px;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: background 0.3s ease;
+        }
+        .play-button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>游戏导航</h1>
+        <div class="game-grid">
+            <div class="game-card">
+                <h2>太空射击游戏</h2>
+                <p>一个刺激的太空射击游戏，使用键盘或触摸控制飞船，击落敌人获得高分！</p>
+                <a href="space_shooter.html" class="play-button">开始游戏</a>
+            </div>
+            <div class="game-card">
+                <h2>另一个游戏</h2>
+                <p>探索更多有趣的游戏体验！</p>
+                <a href="Untitled-1.ipynb" class="play-button">开始游戏</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -11,8 +11,8 @@
 
 ## 在线游玩
 
-访问 [游戏链接](https://你的用户名.github.io/仓库名) 即可开始游玩！
+访问主页 [游戏导航](index.html) 选择想玩的游戏，或直接访问 [太空射击游戏](space_shooter.html) 开始游玩！
 
 ## 本地运行
 
-直接用浏览器打开 `space_shooter.html` 文件即可运行游戏。
+直接用浏览器打开 `index.html` 进入游戏导航页面，或打开 `space_shooter.html` 直接运行游戏。
